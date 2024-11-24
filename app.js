@@ -10,11 +10,12 @@ const archivedEntries = [];
 
 // Initialize Supabase
 const supabase = supabase.createClient(
-    'Yhttps://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
+    'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your anon key
 );
 
 
+console.log(supabase); // This should output a valid Supabase client object in the browser console.
 
 // Add data entry
 form.addEventListener('submit', async (e) => {
@@ -27,6 +28,8 @@ form.addEventListener('submit', async (e) => {
     const name = document.getElementById('name').value;
     const address = document.getElementById('address').value;
     const note = document.getElementById('note').value;
+
+    console.log({ serialNo, date, photoFile, amount, name, address, note });
 
     let photoURL = '';
 
