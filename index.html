@@ -7,7 +7,18 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <script type="module" src="app.js"></script>
+    <script type="importmap">
+        {
+          "imports": {
+            "@supabase/supabase-js": "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/esm"
+          }
+        }
+      </script>
+      <script type="module">
+        import { createClient } from '@supabase/supabase-js';
+        const supabase = createClient('https://pwqwshinrnrcgqfbubyr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg');
+      </script>
+      
     <h1>Data Manager</h1>
     <form id="data-form">
         <input type="text" id="serialNo" placeholder="Serial No." required>
@@ -36,7 +47,7 @@
         <tbody></tbody>
     </table>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-    <script type="module" src="app.js"></script>
+
 
 </body>
 </html>
