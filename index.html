@@ -12,16 +12,19 @@
     <h1>Data Manager</h1>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Supabase only after the DOM is fully loaded
-            const supabase = supabase.createClient('https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
+            console.log('DOM fully loaded and parsed.');
+
+            // Initialize Supabase client with a unique variable name
+            const supabaseClient = supabase.createClient(
+                'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your Supabase anon key
             );
 
-            console.log('Supabase initialized:', supabase);
+            console.log('Supabase client initialized:', supabaseClient);
 
             // Example function to fetch data
             async function fetchData() {
-                const { data, error } = await supabase.from('entries').select('*');
+                const { data, error } = await supabaseClient.from('entries').select('*');
                 if (error) {
                     console.error('Error fetching data:', error);
                 } else {

@@ -1,5 +1,5 @@
 // Initialize Supabase
-const supabase = supabase.createClient(
+const supabaseClient = supabase.createClient(
     'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
                 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your anon key
 );
@@ -20,7 +20,7 @@ form.addEventListener('submit', async (e) => {
     let photoURL = '';
 
     if (photoFile) {
-        const { data, error } = await supabase.storage
+        const { data, error } = await supabaseClient.storage
             .from('photos')
             .upload(`photos/${photoFile.name}`, photoFile);
 
@@ -29,10 +29,10 @@ form.addEventListener('submit', async (e) => {
             return;
         }
 
-        photoURL = supabase.storage.from('photos').getPublicUrl(`photos/${photoFile.name}`).data.publicUrl;
+        photoURL = supabaseClient.storage.from('photos').getPublicUrl(`photos/${photoFile.name}`).data.publicUrl;
     }
 
-    const { error } = await supabase.from('entries').insert([
+    const { error } = await supabaseClient.from('entries').insert([
         {
             serial_no: serialNo,
             date,
@@ -55,7 +55,7 @@ form.addEventListener('submit', async (e) => {
 
 // Fetch data and display it in the table
 async function fetchData() {
-    const { data, error } = await supabase.from('entries').select('*').eq('is_archived', false);
+    const { data, error } = await supabaseClient.from('entries').select('*').eq('is_archived', false);
 
     if (error) {
         console.error('Error fetching data:', error.message);
@@ -83,7 +83,7 @@ async function fetchData() {
 
 // Archive an entry
 async function archiveEntry(id) {
-    const { error } = await supabase.from('entries').update({ is_archived: true }).eq('id', id);
+    const { error } = await supabaseClient.from('entries').update({ is_archived: true }).eq('id', id);
 
     if (error) {
         console.error('Error archiving data:', error.message);
