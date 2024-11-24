@@ -7,64 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- Include Supabase SDK first -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<!-- Your app.js script -->
-<script src="app.js"></script>
-
-
     <h1>Data Manager</h1>
-    <div>
-        <form id="data-form">
-            <input type="text" id="serialNo" placeholder="Serial No." required>
-            <input type="date" id="date" required>
-            <input type="file" id="photo" accept="image/*">
-            <input type="number" id="amount" placeholder="Amount" required>
-            <input type="text" id="name" placeholder="Name" required>
-            <input type="text" id="address" placeholder="Address" required>
-            <textarea id="note" placeholder="Note"></textarea>
-            <button type="submit">Add Entry</button>
-        </form>
-    </div>
-    <div>
-        <input type="text" id="search" placeholder="Search...">
-    </div>
-    <div id="data-table-container">
-        <table id="data-table">
-            <thead>
-                <tr>
-                    <th>Serial No.</th>
-                    <th>Date</th>
-                    <th>Photo</th>
-                    <th>Amount</th>
-                    <th>Name</th>
-                    <th>Address</th>
-                    <th>Note</th>
-                    <th>Archive</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
-    <div>
-        <h2>Archived Data</h2>
-        <table id="archive-table">
-            <thead>
-                <tr>
-                    <th>Serial No.</th>
-                    <th>Date</th>
-                    <th>Photo</th>
-                    <th>Amount</th>
-                    <th>Name</th>
-                    <th>Address</th>
-                    <th>Note</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-    </div>
+    <form id="data-form">
+        <input type="text" id="serialNo" placeholder="Serial No." required>
+        <input type="date" id="date" required>
+        <input type="file" id="photo" accept="image/*">
+        <input type="number" id="amount" placeholder="Amount" required>
+        <input type="text" id="name" placeholder="Name" required>
+        <input type="text" id="address" placeholder="Address" required>
+        <textarea id="note" placeholder="Note"></textarea>
+        <button type="submit">Add Entry</button>
+    </form>
+    <input type="text" id="search" placeholder="Search...">
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>Serial No.</th>
+                <th>Date</th>
+                <th>Photo</th>
+                <th>Amount</th>
+                <th>Name</th>
+                <th>Address</th>
+                <th>Note</th>
+                <th>Archive</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
     <script src="app.js"></script>
 </body>
 </html>
