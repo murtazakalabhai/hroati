@@ -5,30 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Manager</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.2.2/dist/supabase.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
        
     <h1>Data Manager</h1>
     <script>
-        // Initialize Supabase
-        const supabase = supabase.createClient(
-            'https://pwqwshinrnrcgqfbubyr.supabase.co', // Your Supabase URL
-            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Your Supabase anon key
-        );
+        // Ensure the library is loaded before initializing
+        if (typeof supabase !== 'undefined') {
+            // Initialize Supabase
+            const supabase = supabase.createClient(
+                'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
+                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your Supabase anon key
+            );
 
-        // Example: Fetch data to test the connection
-        async function fetchData() {
-            const { data, error } = await supabase.from('entries').select('*');
-            if (error) {
-                console.error('Error fetching data:', error);
-            } else {
-                console.log('Fetched data:', data);
+            // Example: Test fetching data
+            async function fetchData() {
+                const { data, error } = await supabase.from('entries').select('*');
+                if (error) {
+                    console.error('Error fetching data:', error);
+                } else {
+                    console.log('Fetched data:', data);
+                }
             }
-        }
 
-        // Call the function
-        fetchData();
+            // Call the fetchData function
+            fetchData();
+        } else {
+            console.error('Supabase library is not loaded!');
+        }
     </script>
 
 
