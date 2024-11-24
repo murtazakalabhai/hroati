@@ -1,8 +1,11 @@
 // Initialize Supabase
-const supabase = supabase.createClient(
-    'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
-    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your anon key
-);
+
+// Correct 
+let supabase; 
+async function initializeSupabase() { supabase = createClient('https://pwqwshinrnrcgqfbubyr.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg'); } 
+await initializeSupabase(); 
+// Now it's safe to use supabase 
+const { data, error } = await supabase.from('table').select('*');
 
 // Add event listener for form submission
 const form = document.getElementById('data-form');
