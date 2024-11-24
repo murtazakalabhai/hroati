@@ -6,8 +6,18 @@ const searchInput = document.getElementById('search');
 const dataEntries = [];
 const archivedEntries = [];
 
+
+
+// Initialize Supabase
+const supabase = supabase.createClient(
+    'Yhttps://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your anon key
+);
+
+
+
 // Add data entry
-form.addEventListener('submit', (e) => {
+form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
     const serialNo = document.getElementById('serialNo').value;
@@ -18,14 +28,86 @@ form.addEventListener('submit', (e) => {
     const address = document.getElementById('address').value;
     const note = document.getElementById('note').value;
 
-    const photoURL = photoFile ? URL.createObjectURL(photoFile) : '';
+    let photoURL = '';
 
-    const newData = { serialNo, date, photoURL, amount, name, address, note };
-    dataEntries.push(newData);
-    renderTable(dataEntries, dataTableBody, true);
+    // Upload photo to Supabase Storage
+    if (photoFile) {
+        const { data, error } = await supabase.storage
+            .from('photos')
+            .upload(`photos/${photoFile.name}`, photoFile);
 
-    form.reset();
+        if (error) {
+            console.error('Error uploading photo:', error);
+            return;
+        }
+        photoURL = `${supabase.storage.from('photos').getPublicUrl(`photos/${photoFile.name}`).data.publicUrl}`;
+    }
+
+    // Insert data into Supabase Database
+    const { error } = await supabase.from('entries').insert([
+        {
+            serial_no: serialNo,
+            date: date,
+            photo_url: photoURL,
+            amount: parseFloat(amount),
+            name: name,
+            address: address,
+            note: note,
+        },
+    ]);
+
+    if (error) {
+        console.error('Error inserting data:', error);
+        alert('Error saving data!');
+    } else {
+        alert('Data saved successfully!');
+        form.reset();
+        fetchData(); // Refresh the table
+    }
 });
+
+async function fetchData() {
+    const { data, error } = await supabase.from('entries').select('*').eq('is_archived', false);
+
+    if (error) {
+        console.error('Error fetching data:', error);
+        return;
+    }
+
+    const tableBody = document.querySelector('#data-table tbody');
+    tableBody.innerHTML = '';
+
+    data.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.serial_no}</td>
+            <td>${entry.date}</td>
+            <td><img src="${entry.photo_url}" alt="Photo" style="width: 50px;"></td>
+            <td>${entry.amount}</td>
+            <td>${entry.name}</td>
+            <td>${entry.address}</td>
+            <td>${entry.note}</td>
+            <td><button onclick="archiveEntry(${entry.id})">Archive</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+fetchData();
+
+
+async function archiveEntry(id) {
+    const { error } = await supabase.from('entries').update({ is_archived: true }).eq('id', id);
+
+    if (error) {
+        console.error('Error archiving data:', error);
+        alert('Error archiving data!');
+    } else {
+        alert('Data archived successfully!');
+        fetchData(); // Refresh the table
+    }
+}
+
 
 // Render table
 function renderTable(entries, tableBody, allowArchive) {
@@ -65,13 +147,36 @@ function renderTable(entries, tableBody, allowArchive) {
     });
 }
 
-// Search functionality
-searchInput.addEventListener('input', () => {
-    const query = searchInput.value.toLowerCase();
-    const filteredEntries = dataEntries.filter((entry) =>
-        Object.values(entry).some((value) =>
-            value.toString().toLowerCase().includes(query)
-        )
+document.getElementById('search').addEventListener('input', async (e) => {
+    const query = e.target.value.toLowerCase();
+
+    const { data, error } = await supabase.from('entries').select('*').eq('is_archived', false);
+
+    if (error) {
+        console.error('Error searching data:', error);
+        return;
+    }
+
+    const filteredData = data.filter((entry) =>
+        Object.values(entry).some((value) => value.toString().toLowerCase().includes(query))
     );
-    renderTable(filteredEntries, dataTableBody, true);
+
+    const tableBody = document.querySelector('#data-table tbody');
+    tableBody.innerHTML = '';
+
+    filteredData.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.serial_no}</td>
+            <td>${entry.date}</td>
+            <td><img src="${entry.photo_url}" alt="Photo" style="width: 50px;"></td>
+            <td>${entry.amount}</td>
+            <td>${entry.name}</td>
+            <td>${entry.address}</td>
+            <td>${entry.note}</td>
+            <td><button onclick="archiveEntry(${entry.id})">Archive</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
 });
+
