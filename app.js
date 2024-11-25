@@ -5,12 +5,12 @@ const supabaseClient = supabase.createClient(
 );
 
 
-// Login Functionality
+// Custom Login Functionality
 document.getElementById('login-btn').addEventListener('click', async () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
 
-    const { user, error } = await supabaseClient.auth.signInWithPassword({
+    const { data, error } = await supabaseClient.auth.signInWithPassword({
         email,
         password,
     });
@@ -19,27 +19,31 @@ document.getElementById('login-btn').addEventListener('click', async () => {
         alert('Login failed: ' + error.message);
     } else {
         alert('Login successful!');
+        localStorage.setItem('isLoggedIn', 'true'); // Store login state locally
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('main-section').style.display = 'block';
-        fetchData();
+        fetchData(); // Load data after login
     }
 });
 
-// Signup Functionality
-document.getElementById('signup-btn').addEventListener('click', async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-
-    const { user, error } = await supabaseClient.auth.signUp({
-        email,
-        password,
-    });
-
-    if (error) {
-        alert('Sign up failed: ' + error.message);
+// Check Login State on Page Load
+document.addEventListener('DOMContentLoaded', () => {
+    const session = localStorage.getItem('isLoggedIn');
+    if (session === 'true') {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('main-section').style.display = 'block';
+        fetchData(); // Load data
     } else {
-        alert('Sign up successful! Please check your email to confirm.');
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('main-section').style.display = 'none';
     }
+});
+
+// Logout Functionality
+document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('isLoggedIn'); // Clear login state
+    alert('Logged out successfully!');
+    location.reload(); // Reload the page to show the login screen
 });
 
 // Generate Serial Number
@@ -252,4 +256,34 @@ document.getElementById('restore-btn').addEventListener('change', async (e) => {
         console.error('Error restoring data:', err.message);
         alert('Failed to restore data.');
     }
+});
+
+let allEntries = []; // Store fetched entries globally for searching
+
+// Fetch and Render Data
+async function fetchData() {
+    try {
+        const { data, error } = await supabaseClient.from('entries').select('*').eq('is_archived', false);
+        if (error) throw error;
+
+        allEntries = data; // Store fetched data globally
+        renderTable(data); // Render the fetched data
+    } catch (err) {
+        console.error('Error fetching data:', err.message);
+        alert('Failed to fetch data.');
+    }
+}
+
+// Search Functionality
+document.getElementById('search').addEventListener('input', (e) => {
+    const query = e.target.value.toLowerCase();
+
+    // Filter globally stored entries
+    const filteredData = allEntries.filter((entry) =>
+        Object.values(entry).some((value) =>
+            value && value.toString().toLowerCase().includes(query)
+        )
+    );
+
+    renderTable(filteredData); // Re-render the table with filtered data
 });
