@@ -27,12 +27,12 @@ document.getElementById('login-btn').addEventListener('click', async () => {
 });
 
 // Check Login State on Page Load
-document.addEventListener('DOMContentLoaded', () => {
-    const session = localStorage.getItem('isLoggedIn');
-    if (session === 'true') {
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: session } = await supabaseClient.auth.getSession();
+    if (session?.session) {
         document.getElementById('auth-section').style.display = 'none';
         document.getElementById('main-section').style.display = 'block';
-        fetchData(); // Load data
+        fetchData(); // Load data on page load
     } else {
         document.getElementById('auth-section').style.display = 'block';
         document.getElementById('main-section').style.display = 'none';
@@ -64,7 +64,69 @@ async function generateSerialNo() {
 
     return `${currentYear}-${String(nextNumber).padStart(3, '0')}`;
 }
+// Form Submission for Adding New Entry
+document.getElementById('data-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
 
+    // Validate Supabase Session
+    const { data: session } = await supabaseClient.auth.getSession();
+    if (!session?.session) {
+        alert('Your session has expired. Please log in again.');
+        localStorage.removeItem('isLoggedIn');
+        location.reload();
+        return;
+    }
+
+    const serialNo = await generateSerialNo();
+    const date = document.getElementById('date').value;
+    const photoFile = document.getElementById('photo').files[0];
+    const amount = document.getElementById('amount').value;
+    const name = document.getElementById('name').value;
+    const address = document.getElementById('address').value;
+    const note = document.getElementById('note').value;
+
+    let photoURL = '';
+
+    // Upload photo if provided
+    if (photoFile) {
+        try {
+            const { data, error } = await supabaseClient.storage
+                .from('photos')
+                .upload(`photos/${photoFile.name}`, photoFile);
+
+            if (error) throw error;
+
+            photoURL = supabaseClient.storage.from('photos').getPublicUrl(`photos/${photoFile.name}`).data.publicUrl;
+        } catch (err) {
+            console.error('Photo upload error:', err.message);
+            alert('Failed to upload photo.');
+            return;
+        }
+    }
+
+    // Insert new entry into the database
+    try {
+        const { error } = await supabaseClient.from('entries').insert({
+            serial_no: serialNo,
+            date,
+            photo_url: photoURL,
+            amount: parseFloat(amount),
+            name,
+            address,
+            note,
+            is_archived: false,
+        });
+
+        if (error) throw error;
+
+        alert('Entry added successfully!');
+        document.getElementById('data-form').reset();
+        fetchData(); // Refresh the table
+    } catch (err) {
+        console.error('Error saving entry:', err.message);
+        alert('Failed to save entry.');
+    }
+});
 // Fetch and Render Data
 async function fetchData() {
     const { data, error } = await supabaseClient.from('entries').select('*').eq('is_archived', false);
