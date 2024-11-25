@@ -74,6 +74,7 @@ async function generateSerialNo() {
 
     return `${currentYear}-${String(nextNumber).padStart(3, '0')}`;
 }
+
 // Form Submission for Adding New Entry
 document.getElementById('data-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -100,13 +101,18 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
     // Upload photo if provided
     if (photoFile) {
         try {
+            // Generate a unique file name using a timestamp
+            const uniqueFileName = `entry-${Date.now()}-${photoFile.name}`;
             const { data, error } = await supabaseClient.storage
                 .from('photos')
-                .upload(`photos/${photoFile.name}`, photoFile);
+                .upload(`photos/${uniqueFileName}`, photoFile);
 
             if (error) throw error;
 
-            photoURL = supabaseClient.storage.from('photos').getPublicUrl(`photos/${photoFile.name}`).data.publicUrl;
+            photoURL = supabaseClient.storage
+                .from('photos')
+                .getPublicUrl(`photos/${uniqueFileName}`)
+                .data.publicUrl;
         } catch (err) {
             console.error('Photo upload error:', err.message);
             alert('Failed to upload photo.');
@@ -137,6 +143,7 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
         alert('Failed to save entry.');
     }
 });
+
 
 // Check Login State on Page Load
 document.addEventListener('DOMContentLoaded', async () => {
@@ -206,15 +213,17 @@ async function finalizeArchive(entryId) {
     // Upload the archived photo if provided
     if (archivedPhoto) {
         try {
+            // Generate a unique file name using a timestamp
+            const uniqueFileName = `archived-${Date.now()}-${archivedPhoto.name}`;
             const { data, error } = await supabaseClient.storage
                 .from('archived-photos')
-                .upload(`archived-photos/${archivedPhoto.name}`, archivedPhoto);
+                .upload(`archived-photos/${uniqueFileName}`, archivedPhoto);
 
             if (error) throw error;
 
             archivedPhotoURL = supabaseClient.storage
                 .from('archived-photos')
-                .getPublicUrl(`archived-photos/${archivedPhoto.name}`)
+                .getPublicUrl(`archived-photos/${uniqueFileName}`)
                 .data.publicUrl;
         } catch (err) {
             console.error('Archived photo upload error:', err.message);
@@ -244,6 +253,7 @@ async function finalizeArchive(entryId) {
         alert('Failed to archive entry.');
     }
 }
+
 
 
 function formatDate(dateString) {
