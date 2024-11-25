@@ -96,3 +96,111 @@ async function archiveEntry(id) {
 
 // Fetch data initially
 fetchData();
+document.getElementById('search').addEventListener('input', async (e) => {
+    const query = e.target.value.toLowerCase();
+    console.log('Search query:', query);
+
+    try {
+        // Fetch data from Supabase
+        const { data, error } = await supabaseClient.from('entries').select('*');
+        if (error) throw error;
+
+        console.log('Fetched data:', data);
+
+        // Filter data based on the search query
+        const filteredData = data.filter((entry) =>
+            Object.values(entry).some((value) =>
+                value && value.toString().toLowerCase().includes(query)
+            )
+        );
+
+        console.log('Filtered data:', filteredData);
+
+        // Render the filtered data
+        renderTable(filteredData);
+    } catch (err) {
+        console.error('Error searching data:', err.message);
+    }
+});
+function renderTable(data) {
+    const tableBody = document.querySelector('#data-table tbody');
+    tableBody.innerHTML = ''; // Clear the table
+
+    data.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.serial_no}</td>
+            <td>${entry.date}</td>
+            <td><img src="${entry.photo_url}" alt="Photo" style="width: 50px;"></td>
+            <td>${entry.amount}</td>
+            <td>${entry.name}</td>
+            <td>${entry.address}</td>
+            <td>${entry.note}</td>
+            <td><button onclick="archiveEntry(${entry.id})">Archive</button></td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+// Fetch archived entries
+async function fetchArchivedEntries() {
+    try {
+        const { data, error } = await supabaseClient
+            .from('entries')
+            .select('*')
+            .eq('is_archived', true);
+
+        if (error) throw error;
+
+        console.log('Fetched archived entries:', data);
+        renderArchivedTable(data);
+    } catch (err) {
+        console.error('Error fetching archived entries:', err.message);
+    }
+}
+
+// Render archived entries in the table
+function renderArchivedTable(data) {
+    const tableBody = document.querySelector('#archived-table tbody');
+    tableBody.innerHTML = ''; // Clear existing data
+
+    data.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.serial_no}</td>
+            <td>${entry.date}</td>
+            <td><img src="${entry.photo_url}" alt="Photo" style="width: 50px;"></td>
+            <td>${entry.amount}</td>
+            <td>${entry.name}</td>
+            <td>${entry.address}</td>
+            <td>${entry.note}</td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+
+// Search archived entries
+document.getElementById('archived-search').addEventListener('input', async (e) => {
+    const query = e.target.value.toLowerCase();
+
+    try {
+        const { data, error } = await supabaseClient
+            .from('entries')
+            .select('*')
+            .eq('is_archived', true);
+
+        if (error) throw error;
+
+        const filteredData = data.filter((entry) =>
+            Object.values(entry).some((value) =>
+                value && value.toString().toLowerCase().includes(query)
+            )
+        );
+
+        renderArchivedTable(filteredData);
+    } catch (err) {
+        console.error('Error searching archived entries:', err.message);
+    }
+});
+
+// Fetch archived entries on page load
+fetchArchivedEntries();
