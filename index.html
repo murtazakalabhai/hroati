@@ -5,84 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Manager</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
 </head>
 <body>
-       
-    <h1>Data Manager</h1>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('DOM fully loaded and parsed.');
-
-            // Initialize Supabase client with a unique variable name
-            const supabaseClient = supabase.createClient(
-                'https://pwqwshinrnrcgqfbubyr.supabase.co', // Replace with your Supabase URL
-                'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3cXdzaGlucm5yY2dxZmJ1YnlyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjIyMTgsImV4cCI6MjA0Nzk5ODIxOH0.al0mBeeqpwQaK1W2Q-cUtLKSk4feFCYJYUwLJetz7vg' // Replace with your Supabase anon key
-            );
-
-            console.log('Supabase client initialized:', supabaseClient);
-
-            // Example function to fetch data
-            async function fetchData() {
-                const { data, error } = await supabaseClient.from('entries').select('*');
-                if (error) {
-                    console.error('Error fetching data:', error);
-                } else {
-                    console.log('Fetched data:', data);
-                }
-            }
-
-            // Fetch data
-            fetchData();
-        });
-    </script>
-
-
-    <form id="data-form">
-        <input type="text" id="serialNo" placeholder="Serial No." required>
-        <input type="date" id="date" required>
-        <input type="file" id="photo" accept="image/*">
-        <input type="number" id="amount" placeholder="Amount" required>
-        <input type="text" id="name" placeholder="Name" required>
-        <input type="text" id="address" placeholder="Address" required>
-        <textarea id="note" placeholder="Note"></textarea>
-        <button type="submit">Add Entry</button>
-    </form>
-    <input type="text" id="search" placeholder="Search...">
-    <table id="data-table">
-        <thead>
-            <tr>
-                <th>Serial No.</th>
-                <th>Date</th>
-                <th>Photo</th>
-                <th>Amount</th>
-                <th>Name</th>
-                <th>Address</th>
-                <th>Note</th>
-                <th>Archive</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-    <h2>Archived Entries</h2>
-<input type="text" id="archived-search" placeholder="Search Archived...">
-<table id="archived-table">
-    <thead>
-        <tr>
-            <th>Serial No.</th>
-            <th>Date</th>
-            <th>Photo</th>
-            <th>Amount</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Note</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-
-    <script src="app.js"></script>
-
-
+    <header>
+        <h1>Data Manager</h1>
+    </header>
+    <nav>
+        <a href="archived.html" class="nav-link">View Archived Entries</a>
+    </nav>
+    <div id="auth-section">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="password" id="password" placeholder="Enter your password" required>
+        <button id="login-btn">Login</button>
+        <button id="signup-btn">Sign Up</button>
+    </div>
+    <div id="main-section" style="display: none;">
+        <h2>Data Entry</h2>
+        <form id="data-form">
+            <input type="hidden" id="serialNo">
+            <label for="date">Date:</label>
+            <input type="date" id="date" required>
+            <label for="photo">Photo:</label>
+            <input type="file" id="photo" accept="image/*">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" placeholder="Amount" required>
+            <label for="name">Name:</label>
+            <input type="text" id="name" placeholder="Name" required>
+            <label for="address">Address:</label>
+            <input type="text" id="address" placeholder="Address" required>
+            <label for="note">Note:</label>
+            <textarea id="note" placeholder="Note"></textarea>
+            <button type="submit">Add Entry</button>
+        </form>
+        <h2>Search and Data Table</h2>
+        <input type="text" id="search" placeholder="Search...">
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Serial No.</th>
+                    <th>Date</th>
+                    <th>Photo</th>
+                    <th>Amount</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Note</th>
+                    <th>Archive</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h2>Data Actions</h2>
+        <div class="data-actions">
+            <button id="export-btn">Export to Excel</button>
+            <input type="file" id="import-file" accept=".csv, .xlsx">
+            <button id="backup-btn">Backup to JSON</button>
+            <input type="file" id="restore-btn" accept=".json">
+        </div>
+    </div>
 </body>
 </html>

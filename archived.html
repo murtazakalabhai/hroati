@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archived Entries</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="archived.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>Archived Entries</h1>
+    </header>
+    <div id="auth-section">
+        <h2>Login</h2>
+        <input type="email" id="email" placeholder="Enter your email" required>
+        <input type="password" id="password" placeholder="Enter your password" required>
+        <button id="login-btn">Login</button>
+    </div>
+    <div id="archived-section" style="display: none;">
+        <nav>
+            <a href="index.html" class="nav-link">Back to Main Page</a>
+        </nav>
+        <input type="text" id="archived-search" placeholder="Search Archived Entries...">
+        <table id="archived-table">
+            <thead>
+                <tr>
+                    <th>Serial No.</th>
+                    <th>Entry Date</th>
+                    <th>Photo</th>
+                    <th>Amount</th>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Note</th>
+                    <th>Archived Date</th>
+                    <th>Archived Photo</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</body>
+</html>
