@@ -40,10 +40,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Logout Functionality
-document.getElementById('logout-btn').addEventListener('click', () => {
-    localStorage.removeItem('isLoggedIn'); // Clear login state
-    alert('Logged out successfully!');
-    location.reload(); // Reload the page to show the login screen
+document.getElementById('logout-btn').addEventListener('click', async () => {
+    try {
+        const { error } = await supabaseClient.auth.signOut(); // Logout from Supabase
+        if (error) throw error;
+
+        // Clear local session storage
+        localStorage.removeItem('isLoggedIn');
+
+        alert('Logged out successfully!');
+        location.reload(); // Redirect to the login screen
+    } catch (err) {
+        console.error('Error during logout:', err.message);
+        alert('Failed to log out. Please try again.');
+    }
 });
 
 // Generate Serial Number
@@ -68,7 +78,7 @@ async function generateSerialNo() {
 document.getElementById('data-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // Validate Supabase Session
+    // Check Supabase Session
     const { data: session } = await supabaseClient.auth.getSession();
     if (!session?.session) {
         alert('Your session has expired. Please log in again.');
@@ -127,6 +137,21 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
         alert('Failed to save entry.');
     }
 });
+
+// Check Login State on Page Load
+document.addEventListener('DOMContentLoaded', async () => {
+    const { data: session } = await supabaseClient.auth.getSession();
+    if (session?.session) {
+        document.getElementById('auth-section').style.display = 'none';
+        document.getElementById('main-section').style.display = 'block';
+        fetchData(); // Load data on page load
+    } else {
+        document.getElementById('auth-section').style.display = 'block';
+        document.getElementById('main-section').style.display = 'none';
+    }
+});
+
+
 // Fetch and Render Data
 async function fetchData() {
     const { data, error } = await supabaseClient.from('entries').select('*').eq('is_archived', false);
@@ -139,7 +164,7 @@ async function fetchData() {
 
 function renderTable(data) {
     const tableBody = document.querySelector('#data-table tbody');
-    tableBody.innerHTML = '';
+    tableBody.innerHTML = ''; // Clear the table before rendering
 
     data.forEach((entry) => {
         const row = document.createElement('tr');
@@ -152,13 +177,74 @@ function renderTable(data) {
             <td>${entry.address}</td>
             <td>${entry.note}</td>
             <td>
-                <input type="file" id="archived-photo-${entry.id}" accept="image/*">
-                <button onclick="archiveEntry(${entry.id})">Archive</button>
+                <button onclick="enableArchivePhoto(${entry.id})">Archive</button>
+                <input type="file" id="archived-photo-${entry.id}" accept="image/*" disabled>
+                <button onclick="finalizeArchive(${entry.id})">Submit Archive</button>
             </td>
         `;
         tableBody.appendChild(row);
     });
 }
+
+function enableArchivePhoto(entryId) {
+    const photoInput = document.getElementById(`archived-photo-${entryId}`);
+    if (photoInput) {
+        photoInput.disabled = false; // Enable the file input
+        alert('You can now upload the archived photo.');
+    }
+}
+async function finalizeArchive(entryId) {
+    const archivedPhotoInput = document.getElementById(`archived-photo-${entryId}`);
+    if (archivedPhotoInput.disabled) {
+        alert('Please enable and upload an archived photo before submitting.');
+        return;
+    }
+
+    const archivedPhoto = archivedPhotoInput.files[0];
+    let archivedPhotoURL = '';
+
+    // Upload the archived photo if provided
+    if (archivedPhoto) {
+        try {
+            const { data, error } = await supabaseClient.storage
+                .from('archived-photos')
+                .upload(`archived-photos/${archivedPhoto.name}`, archivedPhoto);
+
+            if (error) throw error;
+
+            archivedPhotoURL = supabaseClient.storage
+                .from('archived-photos')
+                .getPublicUrl(`archived-photos/${archivedPhoto.name}`)
+                .data.publicUrl;
+        } catch (err) {
+            console.error('Archived photo upload error:', err.message);
+            alert('Failed to upload archived photo.');
+            return;
+        }
+    }
+
+    // Update the entry with archived details
+    try {
+        const archivedDate = new Date().toISOString();
+        const { error } = await supabaseClient
+            .from('entries')
+            .update({
+                is_archived: true,
+                archived_date: archivedDate,
+                archived_photo_url: archivedPhotoURL,
+            })
+            .eq('id', entryId);
+
+        if (error) throw error;
+
+        alert('Entry archived successfully!');
+        fetchData(); // Refresh the table
+    } catch (err) {
+        console.error('Error archiving entry:', err.message);
+        alert('Failed to archive entry.');
+    }
+}
+
 
 function formatDate(dateString) {
     const date = new Date(dateString);
