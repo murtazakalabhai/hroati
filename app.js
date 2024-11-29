@@ -128,7 +128,6 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
             const { error } = await supabaseClient
                 .from('entries')
                 .update({
-                    serial_no: serialNo,
                     date,
                     amount: parseFloat(amount),
                     name,
