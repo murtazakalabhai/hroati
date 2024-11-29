@@ -129,10 +129,12 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
                 .from('entries')
                 .update({
                     date,
+                    photo_url: photoURL,
                     amount: parseFloat(amount),
                     name,
                     address,
                     note,
+                    is_archived: false,
                 })
                 .eq('id', currentEditId);
 
@@ -144,6 +146,7 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
             const { error } = await supabaseClient.from('entries').insert({
                 serial_no: serialNo,
                 date,
+                photo_url: photoURL,
                 amount: parseFloat(amount),
                 name,
                 address,
