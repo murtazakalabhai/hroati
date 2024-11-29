@@ -56,7 +56,7 @@ async function fetchArchivedEntries() {
     }
 }
 
-// Render Archived Entries in the Table
+// Render Archived Table
 function renderArchivedTable(data) {
     const tableBody = document.querySelector('#archived-table tbody');
     tableBody.innerHTML = ''; // Clear the table before rendering
@@ -66,16 +66,16 @@ function renderArchivedTable(data) {
         row.innerHTML = `
             <td>${entry.serial_no}</td>
             <td>${formatDate(entry.date)}</td>
-            <td><img src="${entry.photo_url}" alt="Photo" style="width: 50px;"></td>
+            <td><img src="${entry.photo_url || ''}" alt="Photo" style="width: 50px;"></td>
             <td>${entry.amount}</td>
             <td>${entry.name}</td>
             <td>${entry.address}</td>
             <td>${entry.note}</td>
-            <td>${entry.archived_date ? formatDate(entry.archived_date) : 'N/A'}</td>
+            <td>${formatDate(entry.archived_date)}</td>
             <td>
                 ${entry.archived_photo_url
                     ? `<img src="${entry.archived_photo_url}" alt="Archived Photo" style="width: 50px;">`
-                    : 'No Photo'}
+                    : 'No Archived Photo'}
             </td>
         `;
         tableBody.appendChild(row);
@@ -84,6 +84,7 @@ function renderArchivedTable(data) {
 
 // Format Date to DD-MM-YYYY
 function formatDate(dateString) {
+    if (!dateString) return 'N/A';
     const date = new Date(dateString);
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');

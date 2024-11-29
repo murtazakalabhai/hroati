@@ -445,3 +445,92 @@ document.getElementById('search').addEventListener('input', (e) => {
 
     renderTable(filteredData); // Re-render the table with filtered data
 });
+
+function renderTable(data) {
+    const tableBody = document.querySelector('#data-table tbody');
+    tableBody.innerHTML = ''; // Clear the table before rendering
+
+    data.forEach((entry) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${entry.serial_no}</td>
+            <td>${formatDate(entry.date)}</td>
+            <td><img src="${entry.photo_url}" style="width:50px;"></td>
+            <td>${entry.amount}</td>
+            <td>${entry.name}</td>
+            <td>${entry.address}</td>
+            <td>${entry.note}</td>
+            <td>
+                <button onclick="editEntry(${entry.id})">Edit</button>
+                <button onclick="enableArchivePhoto(${entry.id})">Archive</button>
+                <input type="file" id="archived-photo-${entry.id}" accept="image/*" disabled>
+                <button onclick="finalizeArchive(${entry.id})">Submit Archive</button>
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+}
+async function editEntry(entryId) {
+    // Fetch the existing entry data
+    try {
+        const { data: entry, error } = await supabaseClient
+            .from('entries')
+            .select('*')
+            .eq('id', entryId)
+            .single();
+
+        if (error) throw error;
+
+        // Populate the form fields with the entry data
+        document.getElementById('serialNo').value = entry.serial_no;
+        document.getElementById('date').value = entry.date.split('T')[0]; // Format the date for the input
+        document.getElementById('amount').value = entry.amount;
+        document.getElementById('name').value = entry.name;
+        document.getElementById('address').value = entry.address;
+        document.getElementById('note').value = entry.note;
+
+        // Show a "Save Changes" button
+        const saveButton = document.createElement('button');
+        saveButton.textContent = 'Save Changes';
+        saveButton.id = 'save-changes-btn';
+        saveButton.onclick = () => saveEditedEntry(entryId); // Call the save function
+        document.getElementById('data-form').appendChild(saveButton);
+    } catch (err) {
+        console.error('Error fetching entry for editing:', err.message);
+        alert('Failed to fetch entry for editing.');
+    }
+}
+async function saveEditedEntry(entryId) {
+    const serialNo = document.getElementById('serialNo').value;
+    const date = document.getElementById('date').value;
+    const amount = document.getElementById('amount').value;
+    const name = document.getElementById('name').value;
+    const address = document.getElementById('address').value;
+    const note = document.getElementById('note').value;
+
+    // Update the database with the new data
+    try {
+        const { error } = await supabaseClient
+            .from('entries')
+            .update({
+                serial_no: serialNo,
+                date,
+                amount: parseFloat(amount),
+                name,
+                address,
+                note,
+            })
+            .eq('id', entryId);
+
+        if (error) throw error;
+
+        alert('Entry updated successfully!');
+        fetchData(); // Refresh the table
+
+        // Remove the "Save Changes" button after saving
+        document.getElementById('save-changes-btn').remove();
+    } catch (err) {
+        console.error('Error updating entry:', err.message);
+        alert('Failed to update entry.');
+    }
+}
