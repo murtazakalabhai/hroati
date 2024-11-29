@@ -516,11 +516,13 @@ async function editEntry(entryId) {
 
  // Update the form submit button text
  document.querySelector('button[type="submit"]').textContent = 'Save Changes';
+ document.getElementById('cancel-edit-btn').style.display = 'block'; // Show the cancel button
 } catch (err) {
  console.error('Error fetching entry for editing:', err.message);
  alert('Failed to fetch entry for editing.');
 }
 }
+
 
 function resetForm() {
     // Clear form fields
@@ -538,13 +540,8 @@ function resetForm() {
     document.querySelector('button[type="submit"]').textContent = 'Add Entry';
 }
 
+
 document.getElementById('cancel-edit-btn').addEventListener('click', () => {
     resetForm();
     document.getElementById('cancel-edit-btn').style.display = 'none'; // Hide the cancel button
 });
-
-// Show Cancel Button During Edit
-function editEntry(entryId) {
-    // Existing logic...
-    document.getElementById('cancel-edit-btn').style.display = 'block'; // Show the cancel button
-}
