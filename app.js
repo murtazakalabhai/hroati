@@ -75,7 +75,8 @@ async function generateSerialNo() {
     return `${currentYear}-${String(nextNumber).padStart(3, '0')}`;
 }
 
-// Form Submission for Adding New Entry
+// // Form Submission for Add/Edit Entry
+let currentEditId = null; // Track the ID of the entry being edited
 document.getElementById('data-form').addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -122,22 +123,43 @@ document.getElementById('data-form').addEventListener('submit', async (e) => {
 
     // Insert new entry into the database
     try {
-        const { error } = await supabaseClient.from('entries').insert({
-            serial_no: serialNo,
-            date,
-            photo_url: photoURL,
-            amount: parseFloat(amount),
-            name,
-            address,
-            note,
-            is_archived: false,
-        });
+        if (currentEditId) {
+            // Edit Mode: Update the existing entry
+            const { error } = await supabaseClient
+                .from('entries')
+                .update({
+                    serial_no: serialNo,
+                    date,
+                    amount: parseFloat(amount),
+                    name,
+                    address,
+                    note,
+                })
+                .eq('id', currentEditId);
 
-        if (error) throw error;
+            if (error) throw error;
 
-        alert('Entry added successfully!');
-        document.getElementById('data-form').reset();
-        fetchData(); // Refresh the table
+            alert('Entry updated successfully!');
+        } else {
+            // Add Mode: Create a new entry
+            const { error } = await supabaseClient.from('entries').insert({
+                serial_no: serialNo,
+                date,
+                amount: parseFloat(amount),
+                name,
+                address,
+                note,
+                is_archived: false,
+            });
+
+            if (error) throw error;
+
+            alert('Entry added successfully!');
+        }
+
+        // Reset form and fetch updated data
+        resetForm();
+        fetchData();
     } catch (err) {
         console.error('Error saving entry:', err.message);
         alert('Failed to save entry.');
@@ -489,48 +511,40 @@ async function editEntry(entryId) {
         document.getElementById('address').value = entry.address;
         document.getElementById('note').value = entry.note;
 
-        // Show a "Save Changes" button
-        const saveButton = document.createElement('button');
-        saveButton.textContent = 'Save Changes';
-        saveButton.id = 'save-changes-btn';
-        saveButton.onclick = () => saveEditedEntry(entryId); // Call the save function
-        document.getElementById('data-form').appendChild(saveButton);
-    } catch (err) {
-        console.error('Error fetching entry for editing:', err.message);
-        alert('Failed to fetch entry for editing.');
-    }
+ // Switch to Edit Mode
+ currentEditId = entryId;
+
+ // Update the form submit button text
+ document.querySelector('button[type="submit"]').textContent = 'Save Changes';
+} catch (err) {
+ console.error('Error fetching entry for editing:', err.message);
+ alert('Failed to fetch entry for editing.');
 }
-async function saveEditedEntry(entryId) {
-    const serialNo = document.getElementById('serialNo').value;
-    const date = document.getElementById('date').value;
-    const amount = document.getElementById('amount').value;
-    const name = document.getElementById('name').value;
-    const address = document.getElementById('address').value;
-    const note = document.getElementById('note').value;
+}
 
-    // Update the database with the new data
-    try {
-        const { error } = await supabaseClient
-            .from('entries')
-            .update({
-                serial_no: serialNo,
-                date,
-                amount: parseFloat(amount),
-                name,
-                address,
-                note,
-            })
-            .eq('id', entryId);
+function resetForm() {
+    // Clear form fields
+    document.getElementById('serialNo').value = '';
+    document.getElementById('date').value = '';
+    document.getElementById('amount').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('address').value = '';
+    document.getElementById('note').value = '';
 
-        if (error) throw error;
+    // Reset to Add Mode
+    currentEditId = null;
 
-        alert('Entry updated successfully!');
-        fetchData(); // Refresh the table
+    // Reset the form submit button text
+    document.querySelector('button[type="submit"]').textContent = 'Add Entry';
+}
 
-        // Remove the "Save Changes" button after saving
-        document.getElementById('save-changes-btn').remove();
-    } catch (err) {
-        console.error('Error updating entry:', err.message);
-        alert('Failed to update entry.');
-    }
+document.getElementById('cancel-edit-btn').addEventListener('click', () => {
+    resetForm();
+    document.getElementById('cancel-edit-btn').style.display = 'none'; // Hide the cancel button
+});
+
+// Show Cancel Button During Edit
+function editEntry(entryId) {
+    // Existing logic...
+    document.getElementById('cancel-edit-btn').style.display = 'block'; // Show the cancel button
 }
