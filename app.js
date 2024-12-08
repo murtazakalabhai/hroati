@@ -197,7 +197,7 @@ function renderTable(data) {
     const tableBody = document.querySelector('#data-table tbody');
     tableBody.innerHTML = ''; // Clear the table before rendering
 
-    data.forEach((entry) => {
+    data.forEach((entry, index) => {
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${entry.serial_no}</td>
@@ -210,7 +210,7 @@ function renderTable(data) {
             <td>
                 <button onclick="editEntry(${entry.id})">Edit</button>
                 <button onclick="enableArchivePhoto(${entry.id})">Archive</button>
-                <input type="file" id="archived-photo-${entry.id}" accept="image/*" disabled>
+                <input type="file" id="archived-photo-${index}" accept="image/*" disabled>
                 <button onclick="finalizeArchive(${entry.id})">Submit Archive</button>
             </td>
         `;
