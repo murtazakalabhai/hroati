@@ -191,6 +191,7 @@ async function fetchData() {
         return;
     }
     renderTable(data);
+    initializeLightbox(); // Attach lightbox logic
 }
 
 function renderTable(data) {
@@ -550,30 +551,29 @@ document.getElementById('cancel-edit-btn').addEventListener('click', () => {
 });
 
 // Lightbox Logic
-document.addEventListener('DOMContentLoaded', () => {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const lightboxClose = document.getElementById('lightbox-close');
-
-    // Open Lightbox
-    document.body.addEventListener('click', (e) => {
-        if (e.target.tagName === 'IMG' && e.target.classList.contains('zoomable')) {
+function initializeLightbox() {
+    const zoomableImages = document.querySelectorAll('.zoomable');
+    zoomableImages.forEach((img) => {
+        img.addEventListener('click', (e) => {
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
             lightboxImg.src = e.target.src;
             lightbox.style.display = 'flex';
-        }
+        });
     });
 
-    // Close Lightbox
+    const lightbox = document.getElementById('lightbox');
+    const lightboxClose = document.getElementById('lightbox-close');
+
     lightboxClose.addEventListener('click', () => {
         lightbox.style.display = 'none';
-        lightboxImg.src = ''; // Clear the source
+        document.getElementById('lightbox-img').src = '';
     });
 
-    // Close Lightbox on Outside Click
     lightbox.addEventListener('click', (e) => {
         if (e.target === lightbox) {
             lightbox.style.display = 'none';
-            lightboxImg.src = ''; // Clear the source
+            document.getElementById('lightbox-img').src = '';
         }
     });
-});
+}
