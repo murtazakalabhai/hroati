@@ -191,7 +191,7 @@ async function fetchData() {
         return;
     }
     renderTable(data);
-    initializeLightbox(); // Attach lightbox logic
+    
 }
 
 function renderTable(data) {
@@ -217,6 +217,8 @@ function renderTable(data) {
         `;
         tableBody.appendChild(row);
     });
+      // Reapply lightbox logic after table is updated
+      initializeLightbox();
 }
 
 function enableArchivePhoto(entryId) {
@@ -470,32 +472,10 @@ document.getElementById('search').addEventListener('input', (e) => {
     );
 
     renderTable(filteredData); // Re-render the table with filtered data
+    initializeLightbox(); // Reinitialize lightbox for the updated table
 });
 
-function renderTable(data) {
-    const tableBody = document.querySelector('#data-table tbody');
-    tableBody.innerHTML = ''; // Clear the table before rendering
 
-    data.forEach((entry) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${entry.serial_no}</td>
-            <td>${formatDate(entry.date)}</td>
-            <td><img src="${entry.photo_url}" style="width:50px;"></td>
-            <td>${entry.amount}</td>
-            <td>${entry.name}</td>
-            <td>${entry.address}</td>
-            <td>${entry.note}</td>
-            <td>
-                <button onclick="editEntry(${entry.id})">Edit</button>
-                <button onclick="enableArchivePhoto(${entry.id})">Archive</button>
-                <input type="file" id="archived-photo-${entry.id}" accept="image/*" disabled>
-                <button onclick="finalizeArchive(${entry.id})">Submit Archive</button>
-            </td>
-        `;
-        tableBody.appendChild(row);
-    });
-}
 async function editEntry(entryId) {
     // Fetch the existing entry data
     try {
@@ -553,6 +533,12 @@ document.getElementById('cancel-edit-btn').addEventListener('click', () => {
 // Lightbox Logic
 function initializeLightbox() {
     const zoomableImages = document.querySelectorAll('.zoomable');
+
+    if (zoomableImages.length === 0) {
+        console.error('No zoomable images found.');
+        return;
+    }
+
     zoomableImages.forEach((img) => {
         img.addEventListener('click', (e) => {
             const lightbox = document.getElementById('lightbox');
